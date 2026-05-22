@@ -1,11 +1,16 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const FROM_EMAIL = 'hey@vibelearn.app'
 
-const FROM_EMAIL = 'hey@vibelearn.app' // Change to youskill.in if domain changes
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 export async function sendWelcomeEmail(to: string, name: string) {
   try {
+    const resend = getResend()
+    if (!resend) return
     await resend.emails.send({
       from: `VibeLearn <${FROM_EMAIL}>`,
       to,
@@ -28,6 +33,8 @@ export async function sendWelcomeEmail(to: string, name: string) {
 
 export async function sendStreakNudge(to: string, streakDays: number) {
   try {
+    const resend = getResend()
+    if (!resend) return
     await resend.emails.send({
       from: `VibeLearn <${FROM_EMAIL}>`,
       to,
