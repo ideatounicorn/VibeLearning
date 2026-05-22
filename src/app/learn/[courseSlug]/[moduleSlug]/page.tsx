@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import { supabaseServer } from '@/lib/supabase-server'
 import LessonPlayer from '@/components/learn/LessonPlayer'
 
@@ -13,11 +14,11 @@ export default async function LearnPage({ params }: Props) {
   const { data: { user } } = await db.auth.getUser()
   if (!user) redirect('/?auth=required')
 
-  // Fetch module with lessons
+  // Fetch current module with lessons
   const { data: module } = await db
     .from('modules')
     .select(`
-      *,
+      id, title, slug, description, order_index,
       course:courses!inner (
         id, title, slug, path_id,
         path:paths ( id, name, slug )
@@ -29,42 +30,81 @@ export default async function LearnPage({ params }: Props) {
 
   if (!module) notFound()
 
-  // Sort lessons
-  const lessons = [...(module.lessons ?? [])].sort((a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index)
+  // Check pro status
+  const { data: sub } = await db.from('subscriptions').select('status').eq('user_id', user.id).eq('status', 'active').maybeSingle()
+  const isPro = !!sub
 
-  // Fetch lesson progress
-  const { data: lessonProgress } = await db
+  // Freemium gating: allow only first 2 modules
+  if (!isPro && (module.order_index ?? 0) > 1) {
+    redirect('/upgrade?source=paywall')
+  }
+
+  // Sort current module lessons
+  const lessons = [...(module.lessons ?? [])].sort(
+    (a: { order_index: number }, b: { order_index: number }) => a.order_index - b.order_index
+  )
+
+  // Normalize Supabase join result (course may be an array)
+  const courseData = Array.isArray(module.course) ? module.course[0] : module.course
+  const normalizedModule = {
+    ...module,
+    course: {
+      ...courseData,
+      path: Array.isArray(courseData?.path) ? (courseData.path[0] ?? null) : (courseData?.path ?? null),
+    },
+  }
+
+  const courseId = normalizedModule.course?.id
+
+  // Fetch ALL modules + their lesson IDs for the course sidebar
+  const { data: allModulesRaw } = await db
+    .from('modules')
+    .select('id, title, slug, order_index, lessons ( id, order_index )')
+    .eq('course_id', courseId)
+    .order('order_index')
+
+  const allModules = (allModulesRaw ?? []).map((m: any) => ({
+    id: m.id,
+    title: m.title,
+    slug: m.slug,
+    order_index: m.order_index,
+    lessonCount: (m.lessons ?? []).length,
+    lessonIds: (m.lessons ?? []).map((l: any) => l.id),
+  }))
+
+  // Fetch all lesson progress across the whole course
+  const allLessonIds = allModules.flatMap(m => m.lessonIds)
+  const { data: allLessonProgress } = await db
     .from('lesson_progress')
     .select('lesson_id, completed_at')
     .eq('user_id', user.id)
-    .in('lesson_id', lessons.map((l: { id: string }) => l.id))
+    .in('lesson_id', allLessonIds.length > 0 ? allLessonIds : ['__none__'])
 
-  const completedLessonIds = (lessonProgress ?? [])
+  const completedLessonIds = (allLessonProgress ?? [])
     .filter((p: { completed_at: string | null }) => p.completed_at)
     .map((p: { lesson_id: string }) => p.lesson_id)
 
-  // Check pro status + fetch course-level module progress
-  const courseId = (module.course as any)?.id
-  const [{ data: sub }, { data: allCourseModules }, { data: completedCourseModules }] = await Promise.all([
-    db.from('subscriptions').select('status').eq('user_id', user.id).eq('status', 'active').maybeSingle(),
-    db.from('modules').select('id').eq('course_id', courseId),
-    db.from('module_progress').select('module_id').eq('user_id', user.id).eq('quiz_passed', true),
-  ])
-  const isPro = !!sub
+  // Module quiz pass status
+  const { data: completedCourseModules } = await db
+    .from('module_progress')
+    .select('module_id')
+    .eq('user_id', user.id)
+    .eq('quiz_passed', true)
 
-  const courseModuleTotal = allCourseModules?.length ?? 0
-  const courseModuleIds = new Set((allCourseModules ?? []).map((m: any) => m.id))
-  const courseModuleCompleted = (completedCourseModules ?? []).filter((p: any) => courseModuleIds.has(p.module_id)).length
+  const passedModuleIds = (completedCourseModules ?? []).map((p: any) => p.module_id)
 
   return (
-    <LessonPlayer
-      module={module}
-      lessons={lessons}
-      completedLessonIds={completedLessonIds}
-      userId={user.id}
-      isPro={isPro}
-      courseModuleTotal={courseModuleTotal}
-      courseModuleCompleted={courseModuleCompleted}
-    />
+    <Suspense fallback={null}>
+      <LessonPlayer
+        module={normalizedModule}
+        lessons={lessons}
+        completedLessonIds={completedLessonIds}
+        userId={user.id}
+        isPro={isPro}
+        courseSlug={courseSlug}
+        allModules={allModules}
+        passedModuleIds={passedModuleIds}
+      />
+    </Suspense>
   )
 }

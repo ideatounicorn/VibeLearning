@@ -1,6 +1,6 @@
 import { supabaseServer } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
-import { ContinueLearning } from '@/components/dashboard/ContinueLearning'
+import { EnrolledCoursesBlock, type EnrolledCourse } from '@/components/dashboard/EnrolledCoursesBlock'
 import { GettingStarted } from '@/components/dashboard/GettingStarted'
 import { StreakTracker } from '@/components/dashboard/StreakTracker'
 import { PathRoadmapWidget } from '@/components/dashboard/PathRoadmapWidget'
@@ -36,7 +36,7 @@ export default async function DashboardPage() {
     pathCourses = courses ?? []
   }
 
-  const [{ data: latestProgress }, { data: completedModules }, { data: subscription }] = await Promise.all([
+  const [{ data: latestProgress }, { data: completedModules }, { data: subscription }, { data: enrollments }] = await Promise.all([
     db.from('lesson_progress')
       .select('lesson:lessons(id, title, module:modules(id, course:courses(slug, name)))')
       .eq('user_id', user.id)
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
       .single(),
 
     db.from('module_progress')
-      .select('id')
+      .select('id, module_id')
       .eq('user_id', user.id)
       .eq('quiz_passed', true),
 
@@ -54,12 +54,73 @@ export default async function DashboardPage() {
       .eq('user_id', user.id)
       .eq('status', 'active')
       .maybeSingle(),
+
+    db.from('course_enrollments')
+      .select('course_id, course:courses(id, title, slug, path:paths(name, category))')
+      .eq('user_id', user.id),
   ])
 
-  const activeLesson: any = (latestProgress as any)?.lesson
   const hasStartedLesson = !!latestProgress
   const hasPassedQuiz = !!(completedModules && completedModules.length > 0)
+
   const isPro = !!subscription
+
+  // Build enrolled courses with progress and last-lesson links
+  let enrolledCoursesList: EnrolledCourse[] = []
+  if (enrollments && enrollments.length > 0) {
+    const courseIds = enrollments.map((e: any) => {
+      const c = Array.isArray(e.course) ? e.course[0] : e.course
+      return c?.id
+    }).filter(Boolean)
+
+    const [{ data: allModules }, { data: lpRaw }] = await Promise.all([
+      db.from('modules').select('id, course_id').in('course_id', courseIds),
+      db.from('lesson_progress')
+        .select('started_at, lesson:lessons(module_id, module:modules(id, course_id))')
+        .eq('user_id', user.id)
+        .order('started_at', { ascending: false })
+        .limit(200),
+    ])
+
+    const completedSet = new Set((completedModules ?? []).map((p: any) => p.module_id))
+
+    const modulesByCourse: Record<string, { total: number; completed: number }> = {}
+    for (const mod of (allModules ?? [])) {
+      if (!modulesByCourse[mod.course_id]) modulesByCourse[mod.course_id] = { total: 0, completed: 0 }
+      modulesByCourse[mod.course_id].total++
+      if (completedSet.has(mod.id)) modulesByCourse[mod.course_id].completed++
+    }
+
+    const lastModulePerCourse: Record<string, string> = {}
+    for (const lp of (lpRaw ?? [])) {
+      const lesson = Array.isArray((lp as any).lesson) ? (lp as any).lesson[0] : (lp as any).lesson
+      const mod = lesson ? (Array.isArray(lesson.module) ? lesson.module[0] : lesson.module) : null
+      if (mod?.course_id && mod?.id && !lastModulePerCourse[mod.course_id]) {
+        lastModulePerCourse[mod.course_id] = mod.id
+      }
+    }
+
+    enrolledCoursesList = enrollments.map((e: any) => {
+      const c = Array.isArray(e.course) ? e.course[0] : e.course
+      const path = c ? (Array.isArray(c.path) ? c.path[0] : c.path) : null
+      const progress = modulesByCourse[c?.id] ?? { total: 0, completed: 0 }
+      const lastModuleId = c?.id ? lastModulePerCourse[c.id] : undefined
+      const hasStarted = !!lastModuleId
+      return {
+        courseId: c?.id ?? '',
+        title: c?.title ?? '',
+        slug: c?.slug ?? '',
+        pathName: path?.name ?? '',
+        pathCategory: path?.category ?? '',
+        progressTotal: progress.total,
+        progressCompleted: progress.completed,
+        lastLessonHref: lastModuleId && c?.slug
+          ? `/learn/${c.slug}/${lastModuleId}`
+          : c?.slug ? `/course-intro/${c.slug}` : null,
+        hasStarted,
+      } as EnrolledCourse
+    }).filter((c: EnrolledCourse) => c.courseId && c.progressCompleted < c.progressTotal)
+  }
 
   const firstName = profile.full_name?.split(' ')[0] ?? 'Learner'
 
@@ -84,10 +145,9 @@ export default async function DashboardPage() {
 
           {/* Main content (left) */}
           <div>
-            {/* Continue Learning */}
-            <ContinueLearning
-              activeLesson={activeLesson}
-              pathName={profile.selected_path?.name ?? null}
+            {/* Enrolled courses — continue / start learning */}
+            <EnrolledCoursesBlock
+              courses={enrolledCoursesList}
               pathSlug={profile.selected_path?.slug ?? null}
             />
 
@@ -160,38 +220,6 @@ export default async function DashboardPage() {
               </div>
             )}
 
-            {/* League teaser */}
-            <div
-              style={{
-                marginTop: '2rem',
-                background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 8%, var(--surface)), var(--surface))',
-                border: '1px solid color-mix(in srgb, var(--accent) 20%, var(--border))',
-                borderRadius: 14,
-                padding: '1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '1rem',
-              }}
-            >
-              <div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.25rem' }}>
-                  Coming Soon
-                </div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.25rem' }}>
-                  🏆 Quartz League
-                </h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Compete weekly with learners at your level. Advance tiers, earn badges.
-                </p>
-              </div>
-              <button
-                disabled
-                style={{ padding: '0.5rem 1rem', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: '0.85rem', cursor: 'not-allowed', whiteSpace: 'nowrap' }}
-              >
-                Coming Soon
-              </button>
-            </div>
           </div>
 
           {/* Right sidebar */}

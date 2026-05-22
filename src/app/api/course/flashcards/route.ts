@@ -6,13 +6,21 @@ const FALLBACK = (title: string) => ({
     headline: `Master ${title}`,
     subheadline: 'Go from beginner to job-ready with structured video lessons',
     emoji: '🚀',
+    imageKeyword: 'code',
+  },
+  courseOverview: {
+    welcome: `Hey! In this course, you will learn how to master ${title}. We have divided this into structured modules to build your path to job-ready skillsets. 🚀`,
+    modules: [
+      { title: 'Core Concepts', description: 'Understand the foundations and basic components.', emoji: '💡' },
+      { title: 'Practical Application', description: 'Build and deploy real-world projects.', emoji: '⚙️' }
+    ]
   },
   glossary: [
-    { term: 'Module', definition: 'A chapter of the course containing multiple lessons and a quiz.', example: 'Module 1 covers the basics of the subject.' },
-    { term: 'Quiz', definition: 'A short test at the end of each module to check your understanding.', example: 'Pass the quiz with 67% or more to unlock the next module.' },
-    { term: 'XP', definition: 'Experience points you earn for completing lessons and quizzes.', example: 'You earn 10 XP for each lesson and 150 XP for passing a quiz.' },
-    { term: 'Certificate', definition: 'A shareable credential you receive when you complete the full course.', example: 'Share your certificate on LinkedIn to show employers your skills.' },
-    { term: 'Career Path', definition: 'A sequence of courses designed to make you job-ready in a specific field.', example: 'The AI Career Path includes 3 courses covering fundamentals to advanced topics.' },
+    { term: 'Module', definition: 'A structured chapter containing related lessons and a concept quiz.', example: 'Each module is followed by an assessment.', emoji: '📖', imageKeyword: 'code' },
+    { term: 'Syllabus', definition: 'The structured outline of topics covered in the course.', example: 'Review the syllabus to understand the roadmap.', emoji: '🗺️', imageKeyword: 'design' },
+    { term: 'XP', definition: 'Rewards earned for completing lessons and passing quizzes.', example: 'Earn 10 XP for each lesson completed.', emoji: '⭐', imageKeyword: 'analytics' },
+    { term: 'Certificate', definition: 'A credential awarded upon completing the entire course.', example: 'Share your certificate on LinkedIn.', emoji: '🏆', imageKeyword: 'design' },
+    { term: 'Quiz', definition: 'A brief assessment at the end of each module to test your knowledge.', example: 'Unlock the next module by passing the quiz.', emoji: '🧠', imageKeyword: 'server' }
   ],
   glossaryQuiz: [
     { question: 'What is a Module?', options: ['A video lesson', 'A chapter with lessons + quiz', 'A certificate', 'A career path'], correctIndex: 1, term: 'Module' },

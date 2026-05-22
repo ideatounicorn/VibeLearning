@@ -37,15 +37,17 @@ export default async function QuizPage({ params }: Props) {
 
   if (!module) redirect('/')
 
-  // Find next module in this course
+  // Module index within course
   const courseModules = (module.course as any)?.modules ?? []
-  const sortedModules = [...courseModules].sort((a, b) => a.order_index - b.order_index)
-  const currentIdx = sortedModules.findIndex(m => m.id === moduleId)
+  const sortedModules = [...courseModules].sort((a: any, b: any) => a.order_index - b.order_index)
+  const currentIdx = sortedModules.findIndex((m: any) => m.id === moduleId)
   const nextModule = sortedModules[currentIdx + 1]
+  const courseSlug = (module.course as any)?.slug ?? ''
+  const courseTitle = (module.course as any)?.title ?? ''
 
   let nextModuleUrl = null
   if (nextModule) {
-    nextModuleUrl = `/learn/${(module.course as any).slug}/${nextModule.id}`
+    nextModuleUrl = `/learn/${courseSlug}/${nextModule.id}`
   } else if ((module.course as any).path_id) {
     // If last module of course, find next course in path
     const { data: nextCourses } = await db
@@ -72,10 +74,43 @@ export default async function QuizPage({ params }: Props) {
     .eq('module_id', moduleId)
     .order('order_index')
 
+  // No quiz for this module — auto-mark as passed and move on
+  if (!questions || questions.length === 0) {
+    const { data: existing } = await db
+      .from('module_progress')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('module_id', moduleId)
+      .maybeSingle()
+
+    if (!existing) {
+      await db.from('module_progress').insert({
+        user_id: user.id,
+        module_id: moduleId,
+        completed_at: new Date().toISOString(),
+        quiz_score: 0,
+        quiz_passed: true,
+        quiz_attempts: 0,
+        xp_awarded: 50,
+      })
+      const { data: prof } = await db.from('profiles').select('xp_total').eq('id', user.id).single()
+      await db.from('profiles').update({
+        last_activity_date: new Date().toDateString(),
+        xp_total: (prof?.xp_total || 0) + 50,
+      }).eq('id', user.id)
+    }
+
+    redirect(nextModuleUrl || nextPath)
+  }
+
   return (
-    <QuizClient 
-      moduleId={moduleId} 
-      moduleTitle={module.title} 
+    <QuizClient
+      moduleId={moduleId}
+      moduleTitle={module.title}
+      moduleIndex={currentIdx >= 0 ? currentIdx : 0}
+      totalModules={sortedModules.length}
+      courseTitle={courseTitle}
+      courseSlug={courseSlug}
       questions={questions ?? []}
       userId={user.id}
       nextPath={nextPath}

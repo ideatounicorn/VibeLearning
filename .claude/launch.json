@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "vibelearn-intro",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["hyperframes", "preview", "--port=3002", "vibelearn-intro"],
+      "port": 3002
+    },
+    {
+      "name": "vibelearn",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    }
+  ]
+}

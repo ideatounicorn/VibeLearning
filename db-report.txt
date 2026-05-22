@@ -1,0 +1,94 @@
+◇ injected env (6) from .env.local // tip: ⌘ override existing { override: true }
+=== DATABASE INVENTORY & INTEGRITY REPORT ===
+
+--- PATHS (10 total) ---
+┌─────────┬────────────────────────────────────────┬─────────────────────────┬─────────────────────────┬──────────────┬─────────────┬─────────────┐
+│ (index) │ id                                     │ name                    │ slug                    │ is_published │ category    │ order_index │
+├─────────┼────────────────────────────────────────┼─────────────────────────┼─────────────────────────┼──────────────┼─────────────┼─────────────┤
+│ 0       │ '68215d18-bba2-4f9c-9f04-5f267ef92257' │ 'AI Generalist'         │ 'ai-generalist'         │ true         │ 'AI'        │ 1           │
+│ 1       │ 'f786ecc3-2045-4e08-841f-16b164ed10e1' │ 'AI Product Building'   │ 'ai-product-building'   │ true         │ 'AI'        │ 1           │
+│ 2       │ '84a28f0f-43bd-4555-be36-716d2770be30' │ 'AI Data Analyst'       │ 'ai-data-analyst'       │ true         │ 'Data'      │ 2           │
+│ 3       │ '41a65d5a-e34b-4423-83ba-68418a45ca5a' │ 'UX Design'             │ 'ux-design'             │ true         │ 'Design'    │ 2           │
+│ 4       │ 'df2cb83a-9e6b-478f-9c05-c57e1a1e9b77' │ 'UX/UI Designer'        │ 'ux-ui-designer'        │ true         │ 'Design'    │ 3           │
+│ 5       │ '8ff2e3c6-9384-4f5e-bce5-d2e363554177' │ 'Product Management'    │ 'product-management'    │ true         │ 'Product'   │ 3           │
+│ 6       │ '765be788-4b83-406e-96ba-ef70504c1230' │ 'Digital Marketing'     │ 'digital-marketing'     │ true         │ 'Marketing' │ 4           │
+│ 7       │ '795172cd-e039-48f4-911e-42c19fb68947' │ 'Cybersecurity Analyst' │ 'cybersecurity-analyst' │ true         │ 'Security'  │ 4           │
+│ 8       │ 'c5e4b545-b240-493d-a542-573c23632a89' │ 'Growth Marketer'       │ 'growth-marketer'       │ true         │ 'Marketing' │ 5           │
+│ 9       │ 'd334bacf-e408-4583-96b5-3c1c0d30d67e' │ 'Data Analysis'         │ 'data-analysis'         │ false        │ 'Data'      │ 5           │
+└─────────┴────────────────────────────────────────┴─────────────────────────┴─────────────────────────┴──────────────┴─────────────┴─────────────┘
+
+--- COURSES (26 total) ---
+Courses count per Path:
+┌─────────┬─────────────────────────┬─────────────────────────┬──────────────┐
+│ (index) │ path_name               │ path_slug               │ course_count │
+├─────────┼─────────────────────────┼─────────────────────────┼──────────────┤
+│ 0       │ 'AI Generalist'         │ 'ai-generalist'         │ 4            │
+│ 1       │ 'AI Product Building'   │ 'ai-product-building'   │ 0            │
+│ 2       │ 'AI Data Analyst'       │ 'ai-data-analyst'       │ 4            │
+│ 3       │ 'UX Design'             │ 'ux-design'             │ 0            │
+│ 4       │ 'UX/UI Designer'        │ 'ux-ui-designer'        │ 3            │
+│ 5       │ 'Product Management'    │ 'product-management'    │ 0            │
+│ 6       │ 'Digital Marketing'     │ 'digital-marketing'     │ 0            │
+│ 7       │ 'Cybersecurity Analyst' │ 'cybersecurity-analyst' │ 0            │
+│ 8       │ 'Growth Marketer'       │ 'growth-marketer'       │ 5            │
+│ 9       │ 'Data Analysis'         │ 'data-analysis'         │ 0            │
+└─────────┴─────────────────────────┴─────────────────────────┴──────────────┘
+Courses with NULL path_id: 10
+
+--- MODULES (21 total) ---
+Empty courses (0 modules) count: 23
+Sample empty courses:
+┌─────────┬────────────────────────────────────────┬────────────────────────────────────────────────────┬────────────────────────────────────────────────────┐
+│ (index) │ id                                     │ title                                              │ slug                                               │
+├─────────┼────────────────────────────────────────┼────────────────────────────────────────────────────┼────────────────────────────────────────────────────┤
+│ 0       │ 'f97ad5aa-3e10-46f4-a8ad-52433935db71' │ 'AI Art Generation'                                │ 'AI-Art-Generation'                                │
+│ 1       │ '134b8867-e39c-4239-8917-1c4916114594' │ 'Generative Design for UX/UI'                      │ 'Generative-Design-for-UX/UI'                      │
+│ 2       │ '02b8614e-34ea-4ce5-8a6b-e44caf965ae0' │ 'Paid Ads'                                         │ 'Paid-ads'                                         │
+│ 3       │ 'dd050e0d-c939-4364-b4b2-57a4b45f6c2d' │ 'Power BI'                                         │ 'Power-bi'                                         │
+│ 4       │ '94d26936-3a55-4eb4-b456-f1452b858428' │ 'Product Photography with Artificial Intelligence' │ 'Product-Photography-with-Artificial-Intelligence' │
+│ 5       │ '10d701cc-142f-43f6-a863-16817ff5d524' │ 'AI Coding with MCP Tools Integration'             │ 'AI-Coding-with-MCP-Tools-Integration'             │
+│ 6       │ 'cb7fe947-23f7-42b6-9e9c-7336dd6ccb6b' │ 'AI for Finance Professionals'                     │ 'AI-for-Finance-Professionals'                     │
+│ 7       │ '56d9f00d-3e52-4d83-8684-5bca418c50a7' │ 'Building AI Agents with N8N'                      │ 'Building-AI-Agents-with-N8N'                      │
+│ 8       │ '1acfa3be-e9a2-48fe-bb9f-0b13da735d5f' │ 'SQL and Relational Databases'                     │ 'Sql-and-relational-databases'                     │
+│ 9       │ 'a8c9b522-ff8d-410a-bc81-b2e4aafe8642' │ 'Visual Design Principles'                         │ 'Visual-design-principles'                         │
+└─────────┴────────────────────────────────────────┴────────────────────────────────────────────────────┴────────────────────────────────────────────────────┘
+
+--- LESSONS (62 total) ---
+Empty modules (0 lessons) count: 1
+Sample empty modules:
+┌─────────┬────────────────────────────────────────┬─────────────────────────────────────┬──────────────────────────────┐
+│ (index) │ module_id                              │ module_title                        │ course_title                 │
+├─────────┼────────────────────────────────────────┼─────────────────────────────────────┼──────────────────────────────┤
+│ 0       │ '80695616-9d17-49a8-9ab8-7c59ed263750' │ 'Foundations of Prompt Engineering' │ 'Prompt Engineering Mastery' │
+└─────────┴────────────────────────────────────────┴─────────────────────────────────────┴──────────────────────────────┘
+
+--- QUIZZES (15 total) ---
+Modules with less than 3 quiz questions: 21
+┌─────────┬────────────────────────────────────────┬──────────────────────────────────┬────────────┐
+│ (index) │ module_title                           │ course_title                     │ quiz_count │
+├─────────┼────────────────────────────────────────┼──────────────────────────────────┼────────────┤
+│ 0       │ 'MCP — Model Context Protocol'         │ 'Master Claude AI — Zero to Pro' │ 2          │
+│ 1       │ 'Claude Code'                          │ 'Master Claude AI — Zero to Pro' │ 2          │
+│ 2       │ 'Extended Thinking & Research Mode'    │ 'Master Claude AI — Zero to Pro' │ 1          │
+│ 3       │ 'Claude CoWork'                        │ 'Master Claude AI — Zero to Pro' │ 1          │
+│ 4       │ 'Claude Skills & Connectors'           │ 'Master Claude AI — Zero to Pro' │ 2          │
+│ 5       │ 'Claude Projects'                      │ 'Master Claude AI — Zero to Pro' │ 1          │
+│ 6       │ 'Claude Artifacts'                     │ 'Master Claude AI — Zero to Pro' │ 1          │
+│ 7       │ 'Prompt Engineering for Claude'        │ 'Master Claude AI — Zero to Pro' │ 2          │
+│ 8       │ 'The Claude Interface & Core Features' │ 'Master Claude AI — Zero to Pro' │ 1          │
+│ 9       │ 'What Is Claude & Why It Matters'      │ 'Master Claude AI — Zero to Pro' │ 2          │
+└─────────┴────────────────────────────────────────┴──────────────────────────────────┴────────────┘
+
+--- STANDALONE ASSESSMENTS (8 total) ---
+┌─────────┬────────────────────────────────────────┬──────────────────────────────────┬──────────────────────────┬────────────────────┬──────────────────┬─────┐
+│ (index) │ id                                     │ title                            │ slug                     │ expected_questions │ actual_questions │ gap │
+├─────────┼────────────────────────────────────────┼──────────────────────────────────┼──────────────────────────┼────────────────────┼──────────────────┼─────┤
+│ 0       │ '0a0ec12a-b9dc-4fba-bc1b-690ebc254272' │ 'UX Design Fundamentals'         │ 'ux-design-fundamentals' │ 25                 │ 5                │ 20  │
+│ 1       │ '21fada70-85eb-4b47-8ef2-63015ea615a8' │ 'AI & Machine Learning Literacy' │ 'ai-ml-literacy'         │ 25                 │ 5                │ 20  │
+│ 2       │ '8df5d9a5-046a-497b-bfd9-c9e8bd6bc6bc' │ 'Data Analysis'                  │ 'data-analysis'          │ 20                 │ 5                │ 15  │
+│ 3       │ 'ef95436e-222c-4f23-9fc1-9e62c68b1791' │ 'Figma Essentials'               │ 'figma-essentials'       │ 25                 │ 5                │ 20  │
+│ 4       │ '69bc1afc-6849-4cab-af9f-d8cbeb5bbbd6' │ 'SQL Fundamentals'               │ 'sql-fundamentals'       │ 20                 │ 5                │ 15  │
+│ 5       │ '0c0eb0d0-484e-4388-8201-1ae44f5d7623' │ 'Digital Marketing'              │ 'digital-marketing'      │ 20                 │ 5                │ 15  │
+│ 6       │ '5086d1e2-9477-409f-882d-1da2ad7606a7' │ 'YouSkill Pulse'                 │ 'youskill-pulse'         │ 25                 │ 5                │ 20  │
+│ 7       │ 'a7dc0ab6-725e-4cc1-beed-2719245dc6b1' │ 'Product Thinking'               │ 'product-thinking'       │ 25                 │ 5                │ 20  │
+└─────────┴────────────────────────────────────────┴──────────────────────────────────┴──────────────────────────┴────────────────────┴──────────────────┴─────┘

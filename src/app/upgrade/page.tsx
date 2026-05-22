@@ -15,13 +15,14 @@ const FEATURES = [
     { label: 'Module quizzes', free: 'First 2', pro: 'Unlimited' },
     { label: 'XP & streak gamification', free: true, pro: true },
     { label: 'Skill assessments', free: '1/week', pro: '2/week' },
+    { label: 'Assessment score reports', free: false, pro: true },
   ]},
   { category: 'GROW', rows: [
     { label: 'Public profile', free: true, pro: true },
     { label: 'Course certificates', free: false, pro: true },
-    { label: 'Skill graph & benchmarks', free: false, pro: true },
     { label: 'Bookmarks', free: true, pro: true },
-    { label: 'League leaderboard', free: false, pro: true },
+    { label: 'Shareable certificate links', free: false, pro: true },
+    { label: 'Priority support', free: false, pro: true },
   ]},
 ]
 
@@ -112,7 +113,7 @@ export default async function UpgradePage() {
               </a>
             )}
             <ul style={{ listStyle: 'none', padding: 0, margin: '1.5rem 0 0', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-              {['Unlimited course library', 'Unlimited module quizzes', 'Skill assessments (2×/week)', 'Course certificates', 'Skill graph & benchmarks', 'League leaderboard', 'Priority support'].map(f => (
+              {['Unlimited course library', 'Unlimited module quizzes', 'Skill assessments (2×/week)', 'Course certificates', 'Assessment score reports', 'Shareable certificate links', 'Priority support'].map(f => (
                 <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.88rem', color: 'var(--text-primary)' }}>
                   <span style={{ color: 'var(--accent)' }}>✓</span> {f}
                 </li>

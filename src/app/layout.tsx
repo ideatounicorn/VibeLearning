@@ -3,6 +3,7 @@ import { Instrument_Serif, Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { LayoutWrapper } from '@/components/LayoutWrapper'
+import { jsonLdScriptProps, organizationJsonLd, websiteJsonLd, SITE_URL } from '@/lib/seo'
 
 const serif = Instrument_Serif({
   subsets: ['latin'],
@@ -17,14 +18,42 @@ const sans = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'VibeLearn — Your first tech job starts here',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'VibeLearn — Career learning paths for AI, Product, Design, Marketing & Data',
+    template: '%s | VibeLearn',
+  },
   description:
-    'Free, structured career learning paths built from the best YouTube has to offer. Learn AI, UX, Product Management, Marketing, and Data Analysis with quizzes that confirm your understanding.',
-  keywords: ['career learning', 'tech job', 'YouTube learning', 'AI course', 'UX design', 'product management'],
+    'Free, structured career learning paths with quizzes and certificates. Learn AI product building, UX design, product management, marketing, and data — solo or with your team.',
+  keywords: [
+    'AI course', 'AI product manager course', 'learn AI', 'vibe coding', 'UX design course',
+    'product management course', 'digital marketing course', 'data analytics course',
+    'team learning platform', 'corporate training', 'career learning paths',
+  ],
+  alternates: { canonical: '/' },
+  authors: [{ name: 'VibeLearn' }],
+  applicationName: 'VibeLearn',
+  category: 'education',
   openGraph: {
     title: 'VibeLearn — Your first tech job starts here',
     description: 'Structured YouTube learning paths with quizzes. Know exactly when you\'re done.',
     type: 'website',
+    url: '/',
+    siteName: 'VibeLearn',
+    images: [
+      {
+        url: '/og.png',
+        width: 1200,
+        height: 630,
+        alt: 'VibeLearn — Your first tech job starts here',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'VibeLearn — Your first tech job starts here',
+    description: 'Structured YouTube learning paths with quizzes. Know exactly when you\'re done.',
+    images: ['/og.png'],
   },
 }
 
@@ -39,6 +68,8 @@ export default function RootLayout({
         className="grain"
         style={{ fontFamily: 'var(--font-sans), system-ui, sans-serif' }}
       >
+        <script {...jsonLdScriptProps(organizationJsonLd())} />
+        <script {...jsonLdScriptProps(websiteJsonLd())} />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <LayoutWrapper>{children}</LayoutWrapper>
         </ThemeProvider>

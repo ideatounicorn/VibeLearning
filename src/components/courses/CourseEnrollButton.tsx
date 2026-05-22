@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 
@@ -13,6 +13,17 @@ export default function CourseEnrollButton({ courseId, courseSlug, isEnrolled, i
   variant?: 'primary' | 'secondary'
 }) {
   const [isEnrolling, setIsEnrolling] = useState(false)
+  // If orientation already done, bypass the intro page and link directly to the lesson
+  const [orientationDone, setOrientationDone] = useState(false)
+
+  useEffect(() => {
+    try {
+      const completed = localStorage.getItem(`orientation_completed_${courseId}`)
+      setOrientationDone(completed === 'true')
+    } catch {
+      // localStorage not available (SSR / private mode)
+    }
+  }, [courseId])
 
   const handleEnroll = async () => {
     if (!isLoggedIn) {
@@ -29,7 +40,7 @@ export default function CourseEnrollButton({ courseId, courseSlug, isEnrolled, i
       })
 
       if (res.ok) {
-        // After enrollment, go through intro
+        // After enrollment, go through intro (first time)
         window.location.href = `/course-intro/${courseSlug}`
       }
     } catch (err) {
@@ -54,9 +65,11 @@ export default function CourseEnrollButton({ courseId, courseSlug, isEnrolled, i
   }
 
   if (isEnrolled) {
+    // If orientation was already completed, skip straight to the lesson
+    const continueTo = orientationDone ? startHref : `/course-intro/${courseSlug}`
     return (
       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} style={{ display: 'inline-block' }}>
-        <Link href={`/course-intro/${courseSlug}`} style={buttonStyle}>
+        <Link href={continueTo} style={buttonStyle}>
           Continue learning →
         </Link>
       </motion.div>

@@ -32,6 +32,8 @@ export default function AuthModal({ mode, onClose, onSuccess, redirectSlug }: Au
           options: { data: { full_name: name } },
         })
         if (error) throw error
+        // Send welcome email (best-effort, non-blocking)
+        fetch('/api/profile/welcome-email', { method: 'POST' }).catch(() => {})
       } else {
         const { error } = await db.auth.signInWithPassword({ email, password })
         if (error) throw error

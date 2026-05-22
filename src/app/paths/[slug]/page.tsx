@@ -1,6 +1,13 @@
 import { notFound } from 'next/navigation'
 import { supabaseServer } from '@/lib/supabase-server'
 import PathDetailClient from '@/components/paths/PathDetailClient'
+import {
+  absoluteUrl,
+  breadcrumbJsonLd,
+  faqJsonLd,
+  jsonLdScriptProps,
+  learningPathJsonLd,
+} from '@/lib/seo'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -8,9 +15,36 @@ interface Props {
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params
+  const db = await supabaseServer()
+  const { data: path } = await db
+    .from('paths')
+    .select('name, description, slug, image_url, category, salary_range')
+    .eq('slug', slug)
+    .single()
+  if (!path) return { title: 'Path not found', robots: { index: false } }
+
+  const desc =
+    path.description ??
+    `Complete ${path.name} career learning path — courses, projects, quizzes, and a shareable certificate on VibeLearn.`
+  const trimmed = desc.length > 158 ? `${desc.slice(0, 155)}…` : desc
+  const url = `/paths/${path.slug}`
   return {
-    title: `${slug.replace(/-/g, ' ')} — VibeLearn`,
-    description: `Full learning roadmap for ${slug.replace(/-/g, ' ')}.`,
+    title: `${path.name} Career Path — Free Courses + Certificate`,
+    description: trimmed,
+    alternates: { canonical: url },
+    openGraph: {
+      title: `${path.name} — Career Learning Path`,
+      description: trimmed,
+      url,
+      type: 'article',
+      images: path.image_url ? [{ url: path.image_url, width: 1200, height: 630 }] : undefined,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${path.name} — Career Learning Path`,
+      description: trimmed,
+      images: path.image_url ? [path.image_url] : undefined,
+    },
   }
 }
 
@@ -77,7 +111,49 @@ export default async function PathPage({ params }: Props) {
     profile = p
   }
 
+  const totalHours = Number(path.total_hours) || undefined
+  const pathSchema = learningPathJsonLd({
+    name: path.name,
+    slug: path.slug,
+    description: path.description,
+    category: path.category,
+    totalHours,
+    totalCourses: (courses ?? []).length,
+    salaryRange: path.salary_range,
+  })
+  const crumbs = breadcrumbJsonLd([
+    { name: 'Home', url: '/' },
+    { name: 'Paths', url: '/paths' },
+    { name: path.name, url: `/paths/${path.slug}` },
+  ])
+  const faqs = [
+    {
+      q: `How long does the ${path.name} path take?`,
+      a: `Most learners complete the ${path.name} path in 4–8 weeks at 30 minutes a day. It is fully self-paced.`,
+    },
+    {
+      q: `Is the ${path.name} path free?`,
+      a: `Yes — full curriculum access is free. A Pro plan unlocks the certificate, advanced projects, and team features.`,
+    },
+    {
+      q: `What jobs can I get after completing ${path.name}?`,
+      a: path.salary_range
+        ? `Graduates pursue roles in ${path.name.toLowerCase()} with salary ranges around ${path.salary_range}.`
+        : `Graduates pursue careers in ${path.name.toLowerCase()} across startups and large companies.`,
+    },
+    {
+      q: `Can my team take this path together?`,
+      a: `Yes. VibeLearn for Teams supports cohort enrollment, manager dashboards, and skill-gap reporting. See /teams.`,
+    },
+  ]
+  const faqSchema = faqJsonLd(faqs)
+
   return (
+    <>
+      <script {...jsonLdScriptProps(pathSchema)} />
+      <script {...jsonLdScriptProps(crumbs)} />
+      <script {...jsonLdScriptProps(faqSchema)} />
+      <link rel="canonical" href={absoluteUrl(`/paths/${path.slug}`)} />
     <PathDetailClient
       path={path}
       courses={courses ?? []}
@@ -87,5 +163,6 @@ export default async function PathPage({ params }: Props) {
       profile={profile}
       otherPaths={otherPaths ?? []}
     />
+    </>
   )
 }

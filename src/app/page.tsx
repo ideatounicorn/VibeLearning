@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import AuthModal from '@/components/AuthModal'
 import { supabase } from '@/lib/supabase'
@@ -60,7 +60,7 @@ const PATHS = [
     emoji: '📊',
     modules: 26,
     hours: 44,
-    badge: 'Coming Soon',
+    badge: 'Waitlist',
   },
 ]
 
@@ -79,11 +79,31 @@ interface InProgressCourse {
   progressTotal: number
   progressCompleted: number
   lastLessonHref: string | null
+  hasStarted: boolean
 }
 
 export default function LandingPage() {
   const [showAuth, setShowAuth] = useState(false)
   const [inProgressCourses, setInProgressCourses] = useState<InProgressCourse[] | null>(null)
+  const [waitlistEmail, setWaitlistEmail] = useState('')
+  const [waitlistStatus, setWaitlistStatus] = useState<'idle' | 'loading' | 'done'>('idle')
+  const waitlistInputRef = useRef<HTMLInputElement>(null)
+
+  const handleWaitlist = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!waitlistEmail || waitlistStatus !== 'idle') return
+    setWaitlistStatus('loading')
+    try {
+      await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: waitlistEmail, path_slug: 'data-analysis' }),
+      })
+      setWaitlistStatus('done')
+    } catch {
+      setWaitlistStatus('done') // still show confirmation
+    }
+  }
 
   useEffect(() => {
     const db = supabase()
@@ -133,6 +153,7 @@ export default function LandingPage() {
         const path = c ? (Array.isArray(c.path) ? c.path[0] : c.path) : null
         const progress = modulesByCourse[c?.id] ?? { total: 0, completed: 0 }
         const lastModuleId = c?.id ? lastModulePerCourse[c.id] : undefined
+        const hasStarted = !!lastModuleId
         return {
           courseId: c?.id ?? '',
           title: c?.title ?? '',
@@ -141,7 +162,10 @@ export default function LandingPage() {
           pathCategory: path?.category ?? '',
           progressTotal: progress.total,
           progressCompleted: progress.completed,
-          lastLessonHref: lastModuleId && c?.slug ? `/learn/${c.slug}/${lastModuleId}` : null,
+          lastLessonHref: lastModuleId && c?.slug
+            ? `/learn/${c.slug}/${lastModuleId}`
+            : c?.slug ? `/course-intro/${c.slug}` : null,
+          hasStarted,
         }
       }).filter((c: InProgressCourse) => c.progressCompleted < c.progressTotal) // only in-progress
 
@@ -271,7 +295,7 @@ export default function LandingPage() {
       {inProgressCourses && inProgressCourses.length > 0 && (
         <section style={{ maxWidth: 1100, margin: '0 auto', padding: '0 1.5rem 3rem' }}>
           <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: 'var(--cream)', marginBottom: '1.25rem' }}>
-            Pick up where you left off.
+            {inProgressCourses.some(c => c.hasStarted) ? 'Pick up where you left off.' : 'Your enrolled courses.'}
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
             {inProgressCourses.map(c => {
@@ -297,7 +321,7 @@ export default function LandingPage() {
                       </div>
                     </div>
                     <Link
-                      href={c.lastLessonHref ?? `/courses/${c.slug}`}
+                      href={c.lastLessonHref ?? `/course-intro/${c.slug}`}
                       style={{
                         display: 'block', textAlign: 'center', fontSize: '0.82rem', fontWeight: 600,
                         padding: '0.5rem', borderRadius: 8, textDecoration: 'none',
@@ -305,7 +329,7 @@ export default function LandingPage() {
                         color: g1, border: `1px solid ${g1}30`,
                       }}
                     >
-                      Continue →
+                      {c.hasStarted ? 'Continue learning →' : 'Start learning →'}
                     </Link>
                   </div>
                 </div>
@@ -436,12 +460,9 @@ export default function LandingPage() {
             gap: '1.25rem',
           }}
         >
-          {PATHS.map(path => (
-            <Link
-              key={path.slug}
-              href={path.badge === 'Coming Soon' ? '#' : `/paths/${path.slug}`}
-              style={{ textDecoration: 'none' }}
-            >
+          {PATHS.map(path => {
+            const isWaitlist = path.badge === 'Waitlist'
+            const cardContent = (
               <div
                 style={{
                   background: 'var(--dim)',
@@ -450,13 +471,12 @@ export default function LandingPage() {
                   padding: '1.5rem',
                   height: '100%',
                   transition: 'border-color 0.2s, transform 0.2s',
-                  cursor: path.badge === 'Coming Soon' ? 'default' : 'pointer',
-                  opacity: path.badge === 'Coming Soon' ? 0.5 : 1,
+                  cursor: isWaitlist ? 'default' : 'pointer',
                   position: 'relative',
                   overflow: 'hidden',
                 }}
                 onMouseEnter={e => {
-                  if (path.badge !== 'Coming Soon') {
+                  if (!isWaitlist) {
                     (e.currentTarget as HTMLDivElement).style.borderColor = path.color
                     ;(e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'
                   }
@@ -470,9 +490,7 @@ export default function LandingPage() {
                 <div
                   style={{
                     position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
+                    top: 0, left: 0, right: 0,
                     height: 3,
                     background: `linear-gradient(90deg, color-mix(in srgb, ${path.color} 53%, transparent), color-mix(in srgb, ${path.color} 13%, transparent))`,
                   }}
@@ -495,42 +513,73 @@ export default function LandingPage() {
                   )}
                 </div>
 
-                <h3
-                  style={{
-                    fontSize: '1.1rem',
-                    fontWeight: 600,
-                    color: 'var(--cream)',
-                    marginBottom: '0.4rem',
-                  }}
-                >
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--cream)', marginBottom: '0.4rem' }}>
                   {path.name}
                 </h3>
-                <p
-                  style={{
-                    color: 'var(--muted)',
-                    fontSize: '0.875rem',
-                    lineHeight: 1.55,
-                    marginBottom: '1.25rem',
-                  }}
-                >
+                <p style={{ color: 'var(--muted)', fontSize: '0.875rem', lineHeight: 1.55, marginBottom: '1.25rem' }}>
                   {path.description}
                 </p>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: '1rem',
-                    color: 'var(--muted)',
-                    fontSize: '0.8rem',
-                  }}
-                >
-                  <span>{path.modules} modules</span>
-                  <span>·</span>
-                  <span>{path.hours}h content</span>
-                </div>
+                {/* Waitlist form for Data Analysis */}
+                {isWaitlist ? (
+                  waitlistStatus === 'done' ? (
+                    <p style={{ fontSize: '0.85rem', color: path.color, fontWeight: 600 }}>
+                      ✓ You&apos;re on the list! We&apos;ll email you when it launches.
+                    </p>
+                  ) : (
+                    <form
+                      onSubmit={handleWaitlist}
+                      onClick={e => e.stopPropagation()}
+                      style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem' }}
+                    >
+                      <input
+                        ref={waitlistInputRef}
+                        type="email"
+                        placeholder="your@email.com"
+                        value={waitlistEmail}
+                        onChange={e => setWaitlistEmail(e.target.value)}
+                        required
+                        style={{
+                          flex: 1, padding: '0.5rem 0.75rem',
+                          borderRadius: 8, border: `1.5px solid color-mix(in srgb, ${path.color} 40%, transparent)`,
+                          background: `color-mix(in srgb, ${path.color} 5%, transparent)`,
+                          color: 'var(--cream)', fontSize: '0.82rem', outline: 'none',
+                        }}
+                      />
+                      <button
+                        type="submit"
+                        disabled={waitlistStatus === 'loading'}
+                        style={{
+                          padding: '0.5rem 0.85rem', borderRadius: 8, border: 'none',
+                          background: path.color, color: '#000', fontWeight: 700,
+                          fontSize: '0.82rem', cursor: 'pointer', flexShrink: 0,
+                          opacity: waitlistStatus === 'loading' ? 0.6 : 1,
+                        }}
+                      >
+                        {waitlistStatus === 'loading' ? '...' : 'Notify me'}
+                      </button>
+                    </form>
+                  )
+                ) : (
+                  <div style={{ display: 'flex', gap: '1rem', color: 'var(--muted)', fontSize: '0.8rem' }}>
+                    <span>{path.modules} modules</span>
+                    <span>·</span>
+                    <span>{path.hours}h content</span>
+                  </div>
+                )}
               </div>
-            </Link>
-          ))}
+            )
+
+            return isWaitlist ? (
+              <div key={path.slug} style={{ textDecoration: 'none' }}>
+                {cardContent}
+              </div>
+            ) : (
+              <Link key={path.slug} href={`/paths/${path.slug}`} style={{ textDecoration: 'none' }}>
+                {cardContent}
+              </Link>
+            )
+          })}
         </div>
       </section>
 
@@ -631,14 +680,22 @@ export default function LandingPage() {
       <footer
         style={{
           borderTop: '1px solid var(--line)',
-          padding: '1.5rem',
+          padding: '2rem 1.5rem',
           textAlign: 'center',
           color: 'var(--muted)',
           fontSize: '0.8rem',
         }}
       >
-        © 2026 VibeLearn · Built with love for first-time job-seekers ·{' '}
-        <a href="mailto:hey@vibelearn.app" style={{ color: 'var(--muted)' }}>hey@vibelearn.app</a>
+        <div style={{ marginBottom: '0.75rem' }}>
+          © 2026 VibeLearn · Built with love for first-time job-seekers ·{' '}
+          <a href="mailto:hey@vibelearn.app" style={{ color: 'var(--muted)' }}>hey@vibelearn.app</a>
+        </div>
+        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href="/privacy" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Privacy Policy</Link>
+          <Link href="/terms" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Terms of Service</Link>
+          <Link href="/paths" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Browse Paths</Link>
+          <Link href="/upgrade" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Pricing</Link>
+        </div>
       </footer>
 
       {showAuth && (

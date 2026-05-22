@@ -6,8 +6,10 @@ import { AppShell } from './AppShell'
 
 const PUBLIC_PATHS = ['/', '/login']
 // These routes render completely full-screen — no header, no sidebar
-const FULLSCREEN_PATHS = ['/onboarding']
-const AUTH_PREFIXES = ['/dashboard', '/paths', '/courses', '/learn', '/quiz', '/profile', '/settings', '/bookmarks', '/upgrade', '/assessments']
+const FULLSCREEN_PATHS = ['/onboarding', '/learn', '/course-intro', '/quiz']
+const AUTH_PREFIXES = ['/dashboard', '/paths', '/courses', '/profile', '/settings', '/bookmarks', '/upgrade', '/assessments']
+
+
 
 export function LayoutWrapper({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()

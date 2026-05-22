@@ -27,8 +27,9 @@ export async function POST(req: NextRequest) {
 
   const scoredCourses = (courses ?? []).map(c => {
     let score = 0
-    const tags = (c.tags ?? []).map((t: string) => t.toLowerCase())
+    const tags = ((c.tags as string[] | null) ?? []).map((t: string) => t.toLowerCase())
     const titleWords = c.title.toLowerCase()
+    const level = (c.level as string | null) ?? 'beginner'
 
     // Boost courses matching weak topics (areas to improve)
     for (const wt of weakTopics) {
@@ -39,9 +40,9 @@ export async function POST(req: NextRequest) {
       if (tags.some((t: string) => t.includes(st)) || titleWords.includes(st)) score += 1
     }
     // Boost beginner/intermediate based on score
-    if (pct < 50 && c.level === 'beginner') score += 2
-    if (pct >= 50 && pct < 75 && c.level === 'intermediate') score += 2
-    if (pct >= 75 && c.level === 'advanced') score += 2
+    if (pct < 50 && level === 'beginner') score += 2
+    if (pct >= 50 && pct < 75 && level === 'intermediate') score += 2
+    if (pct >= 75 && level === 'advanced') score += 2
 
     // Career goal match
     if (careerGoal && titleWords.includes(careerGoal.toLowerCase())) score += 4

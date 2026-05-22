@@ -297,8 +297,8 @@ export function AppShell({ children }: AppShellProps) {
           .app-main { margin-left: 0 !important; }
         }
         @media (min-width: 768px) {
-          .app-main { margin-left: 220px; }
-          .app-header { left: 220px; }
+          .app-main { margin-left: 224px; }
+          .app-header { left: 224px; }
         }
       `}</style>
     </div>
