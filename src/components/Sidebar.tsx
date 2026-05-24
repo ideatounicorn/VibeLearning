@@ -35,17 +35,6 @@ function CoursesIcon({ active }: { active?: boolean }) {
   )
 }
 
-function PathsIcon({ active }: { active?: boolean }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="5" cy="6" r="2" fill={active ? 'currentColor' : 'none'} />
-      <circle cx="19" cy="6" r="2" fill={active ? 'currentColor' : 'none'} />
-      <circle cx="12" cy="18" r="2" fill={active ? 'currentColor' : 'none'} />
-      <path d="M7 6h10M5 8v6a2 2 0 002 2h1M19 8v6a2 2 0 01-2 2h-1" />
-    </svg>
-  )
-}
-
 function AssessmentsIcon({ active }: { active?: boolean }) {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -57,17 +46,6 @@ function AssessmentsIcon({ active }: { active?: boolean }) {
   )
 }
 
-function RoadmapIcon({ active }: { active?: boolean }) {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 17l4-8 4 4 4-6 4 4" />
-      <circle cx="7" cy="9" r="1.5" fill={active ? 'currentColor' : 'none'} />
-      <circle cx="11" cy="13" r="1.5" fill={active ? 'currentColor' : 'none'} />
-      <circle cx="15" cy="7" r="1.5" fill={active ? 'currentColor' : 'none'} />
-      <circle cx="19" cy="11" r="1.5" fill={active ? 'currentColor' : 'none'} />
-    </svg>
-  )
-}
 
 function TeamsIcon({ active }: { active?: boolean }) {
   return (
@@ -127,7 +105,6 @@ const NAV_ITEMS = [
 
 const LEARN_ITEMS = [
   { href: '/courses', label: 'Courses', icon: CoursesIcon },
-  { href: '/paths', label: 'Career Paths', icon: PathsIcon },
   { href: '/assessments', label: 'Assessments', icon: AssessmentsIcon },
 ]
 
@@ -232,7 +209,7 @@ function ProCard() {
         </span>
       </div>
       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.4, margin: 0 }}>
-        Unlock all courses, certifications & career paths.
+        Unlock all courses & certifications.
       </p>
       <Link
         href="/upgrade"

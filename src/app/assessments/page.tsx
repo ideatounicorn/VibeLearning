@@ -1,70 +1,82 @@
 import { supabaseServer } from '@/lib/supabase-server'
-import AssessmentsGrid from '@/components/assessments/AssessmentsGrid'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 export const metadata = {
-  title: 'Assessments — VibeLearn',
-  description: 'Benchmark your skills and receive personalized learning recommendations.',
+  title: 'PM Assessments — VibeLearn',
 }
-
-const ASSESSMENT_FAQS = [
-  { q: 'What is a VibeLearn assessment?', a: 'Assessments are standalone skill benchmarks that measure your knowledge in a specific domain. They use a duolingo-style format with hearts (lives) and XP rewards for correct answers.' },
-  { q: 'What kind of assessments does VibeLearn offer?', a: 'We offer assessments across Skills (UX, Product, AI, Data, Marketing) and Tools (Figma, SQL). Each assessment adapts to your level and delivers a personalized skill report.' },
-  { q: 'How is an assessment different from a course quiz?', a: 'Course quizzes test knowledge from specific modules. Assessments are broader, standalone benchmarks with a game-like format — hearts, XP per question, and a comprehensive score report.' },
-  { q: 'What is the cost of taking an assessment?', a: 'Most assessments are free. Pro assessments require a subscription, which unlocks all 5 career paths and every assessment.' },
-  { q: 'Why are skill assessments important?', a: 'Assessments give you an objective view of your strengths and gaps, helping you focus your learning where it matters most.' },
-  { q: 'Will taking assessments help my career?', a: 'Yes. Completing assessments demonstrates initiative and self-awareness. Your results can guide which career path to pursue and which skills to prioritize.' },
-  { q: 'Can I retake an assessment?', a: 'Yes. You can retake assessments as many times as you like. Your best score is saved and displayed on your profile.' },
-  { q: 'Are VibeLearn assessments credible for hiring?', a: 'Our assessments are designed around real industry skill standards. They are useful for self-evaluation and for communicating your skills to employers.' },
-]
 
 export default async function AssessmentsPage() {
   const db = await supabaseServer()
-  const { data: assessments } = await db
-    .from('assessments')
-    .select('id, title, slug, short_description, category, icon_emoji, icon_bg, duration_minutes, question_count, attempts_count, xp_reward, is_pro')
-    .eq('is_published', true)
-    .order('order_index')
+  const { data: { user } } = await db.auth.getUser()
+
+  if (!user) {
+    redirect('/?auth=required')
+  }
+
+  // Fetch all categories and their sub-skills
+  const { data: categories, error } = await db
+    .from('categories')
+    .select(`
+      id,
+      name,
+      slug,
+      description,
+      sub_skills (
+        id,
+        name,
+        slug,
+        description,
+        display_questions,
+        time_limit_minutes
+      )
+    `)
+    .order('display_order')
+
+  // We sort sub_skills using javascript to ensure predictable order
+  const categoriesWithSortedSkills = categories?.map(cat => ({
+    ...cat,
+    sub_skills: [...(cat.sub_skills || [])].sort((a, b) => a.name.localeCompare(b.name))
+  })) || []
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--ink)' }}>
-      {/* Header */}
-      <div style={{ padding: '3rem 1.5rem 2rem', borderBottom: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 700, color: 'var(--cream)', marginBottom: '0.5rem' }}>
-            Assessments
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
-            Discover your skill level and receive customized learning recommendations.
-          </p>
+    <div className="w-full max-w-5xl mx-auto px-4 py-8">
+      {/* Top Filter */}
+      <div className="flex items-center justify-between mb-10 border-b border-[var(--border)] pb-6">
+        <div>
+          <h1 className="text-3xl font-extrabold text-[var(--text-primary)] mb-2">Assessments</h1>
+          <p className="text-[var(--text-muted)] text-sm">Validate your product management skills and earn proficiency badges.</p>
         </div>
-      </div>
-
-      {/* Grid */}
-      <div style={{ padding: '3rem 1.5rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <AssessmentsGrid assessments={assessments ?? []} />
-        </div>
-      </div>
-
-      {/* FAQ */}
-      <div style={{ padding: '3rem 1.5rem', borderTop: '1px solid var(--border)' }}>
-        <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          <h2 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--cream)', marginBottom: '2rem' }}>FAQs</h2>
-          <div>
-            {ASSESSMENT_FAQS.map((faq, i) => (
-              <details key={i} style={{ borderTop: '1px solid var(--border)', padding: '1.25rem 0' }}>
-                <summary style={{ fontSize: '1rem', fontWeight: 500, color: 'var(--cream)', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem' }}>
-                  {faq.q}
-                  <span style={{ color: 'var(--text-muted)', flexShrink: 0, fontSize: '1.25rem', fontWeight: 300 }}>+</span>
-                </summary>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', lineHeight: 1.65, marginTop: '0.75rem', paddingRight: '2rem' }}>
-                  {faq.a}
-                </p>
-              </details>
-            ))}
+        <div className="flex gap-2">
+          <div className="px-4 py-1.5 rounded-full bg-[var(--green)] text-[var(--btn-text)] text-sm font-bold shadow-sm">
+            PM (Product Management)
           </div>
         </div>
       </div>
+
+      {categoriesWithSortedSkills.map((category) => (
+        <div key={category.id} className="mb-12">
+          <h2 className="text-xl font-bold text-[var(--text-primary)] mb-1">{category.name}</h2>
+          <p className="text-sm text-[var(--text-muted)] mb-5">{category.description}</p>
+          
+          <div className="flex flex-wrap gap-3">
+            {category.sub_skills?.map(skill => (
+              <Link 
+                key={skill.id} 
+                href={`/assessments/${skill.id}`}
+                className="group relative px-5 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] hover:border-[var(--green)] hover:bg-color-mix(in srgb, var(--green) 5%, transparent) transition-all duration-200"
+              >
+                <div className="font-semibold text-[var(--text-primary)] text-sm mb-1 group-hover:text-[var(--green)] transition-colors">
+                  {skill.name}
+                </div>
+                <div className="text-[0.65rem] text-[var(--text-muted)] font-medium uppercase tracking-wider">
+                  {skill.display_questions} Qs • {skill.display_questions * 0.5} mins
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

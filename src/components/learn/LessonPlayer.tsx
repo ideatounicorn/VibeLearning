@@ -40,6 +40,11 @@ interface CourseModule {
   lessonIds: string[]
 }
 
+interface ModuleRecap {
+  key_takeaways: string[]
+  exercises_jsonb: Array<{ prompt: string; type: string; screenshot_hint?: string }>
+}
+
 interface Props {
   module: Module
   lessons: Lesson[]
@@ -49,6 +54,9 @@ interface Props {
   courseSlug: string
   allModules: CourseModule[]
   passedModuleIds: string[]
+  moduleRecap: ModuleRecap | null
+  courseCompletedLessons: number
+  courseTotalLessons: number
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -489,10 +497,115 @@ function CourseSidebar({
   )
 }
 
+// ─── Module Recap Screen ───────────────────────────────────────────────────────
+function ModuleRecapScreen({
+  module, recap, onStartQuiz,
+}: {
+  module: Module
+  recap: ModuleRecap | null
+  onStartQuiz: () => void
+}) {
+  const takeaways = recap?.key_takeaways ?? []
+  const exercises = recap?.exercises_jsonb ?? []
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'var(--bg)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.5rem', borderBottom: '1.5px solid var(--line)', flexShrink: 0 }}>
+        <span style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--green)' }}>
+          Module Complete
+        </span>
+        <button onClick={onStartQuiz} style={{ background: 'var(--surface)', border: '1.5px solid var(--line)', color: 'var(--text-muted)', borderRadius: 8, padding: '0.35rem 0.85rem', fontSize: '0.78rem', cursor: 'pointer' }}>
+          Skip to quiz →
+        </button>
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '2rem 1.5rem' }}>
+        <div style={{ width: '100%', maxWidth: 600 }}>
+          {/* Hero */}
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <motion.div animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 1.5, repeat: Infinity }}>
+              <span style={{ fontSize: '4rem', display: 'block', marginBottom: '1rem' }}>🎉</span>
+            </motion.div>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', fontWeight: 900, color: 'var(--cream)', marginBottom: '0.5rem' }}>
+              {module.title} — Done!
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+              You watched all lessons. Lock in what you learned before the quiz.
+            </p>
+          </div>
+
+          {/* Key takeaways */}
+          {takeaways.length > 0 && (
+            <div style={{ marginBottom: '2rem' }}>
+              <h2 style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--green)', marginBottom: '0.875rem' }}>
+                Key Takeaways
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {takeaways.map((t, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }}
+                    style={{ display: 'flex', gap: '0.875rem', alignItems: 'flex-start', background: 'var(--surface)', border: '1.5px solid var(--line)', borderRadius: 12, padding: '0.8rem 1rem' }}>
+                    <span style={{ color: 'var(--green)', fontWeight: 700, flexShrink: 0, marginTop: '0.05rem' }}>✦</span>
+                    <p style={{ color: 'var(--cream)', fontSize: '0.9rem', lineHeight: 1.5, margin: 0 }}>{t}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Pause-and-apply exercises */}
+          {exercises.length > 0 && (
+            <div style={{ marginBottom: '2.5rem' }}>
+              <h2 style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--amber)', marginBottom: '0.875rem' }}>
+                ⏸ Pause & Apply — Try these before the quiz
+              </h2>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {exercises.map((ex, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
+                    style={{ background: 'color-mix(in srgb, var(--amber) 6%, transparent)', border: '1.5px solid color-mix(in srgb, var(--amber) 22%, transparent)', borderRadius: 12, padding: '1rem 1.125rem' }}>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--amber)', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '0.4rem' }}>
+                      Exercise {i + 1}
+                    </div>
+                    <p style={{ color: 'var(--cream)', fontSize: '0.9rem', lineHeight: 1.55, margin: 0, marginBottom: ex.screenshot_hint ? '0.6rem' : 0 }}>{ex.prompt}</p>
+                    {ex.screenshot_hint && (
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.78rem', fontStyle: 'italic', margin: 0 }}>
+                        📸 {ex.screenshot_hint}
+                      </p>
+                    )}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Quiz CTA */}
+          <div style={{ textAlign: 'center', padding: '1.5rem', background: 'var(--surface)', border: '1.5px solid var(--line)', borderRadius: 16 }}>
+            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🧠</div>
+            <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.3rem', fontWeight: 800, color: 'var(--cream)', marginBottom: '0.4rem' }}>
+              Ready for the Module Quiz?
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: 1.5 }}>
+              15 questions · Pass at 67%+ · +150 XP · Module badge
+            </p>
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+              onClick={onStartQuiz}
+              className="btn-primary"
+              style={{ padding: '0.7rem 2rem', fontSize: '0.95rem', fontWeight: 700, borderRadius: 12, width: '100%', maxWidth: 280 }}
+            >
+              Start Quiz →
+            </motion.button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Main LessonPlayer ────────────────────────────────────────────────────────
 export default function LessonPlayer({
   module, lessons, completedLessonIds, userId, isPro, courseSlug,
-  allModules, passedModuleIds,
+  allModules, passedModuleIds, moduleRecap,
+  courseCompletedLessons, courseTotalLessons,
 }: Props) {
   const router = useRouter()
 
@@ -505,6 +618,7 @@ export default function LessonPlayer({
   const [xpFloat, setXpFloat] = useState(false)
   const [videoLoaded, setVideoLoaded] = useState(false)
   const [showIntro, setShowIntro] = useState(false)
+  const [showRecap, setShowRecap] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)  // closed by default — more screen real estate
   const [lessonPickerOpen, setLessonPickerOpen] = useState(false)
 
@@ -568,8 +682,8 @@ export default function LessonPlayer({
         setXpFloat(true)
         setTimeout(() => setXpFloat(false), 1200)
         if (isLastLesson) {
-          // All lessons done — go to quiz
-          setTimeout(() => router.push(`/quiz/${module.id}`), 600)
+          // All lessons done — show recap before quiz
+          setTimeout(() => setShowRecap(true), 600)
         } else {
           setTimeout(() => setActiveLessonIdx(i => i + 1), 400)
         }
@@ -590,13 +704,20 @@ export default function LessonPlayer({
     )
   }
 
+  // Only set autoplay=1 after intro dismissed — prevents video streaming behind intro overlay
   const embedUrl = activeLesson?.youtube_video_id
-    ? `https://www.youtube.com/embed/${activeLesson.youtube_video_id}?rel=0&modestbranding=1&autoplay=1`
+    ? `https://www.youtube.com/embed/${activeLesson.youtube_video_id}?rel=0&modestbranding=1&autoplay=${showIntro ? '0' : '1'}`
     : null
 
   const SIDEBAR_W = 280
   const TOP_BAR_H = 52
   const BOTTOM_BAR_H = 64
+
+  // Course-wide progress
+  const courseProgressPct = courseTotalLessons > 0
+    ? Math.round(((courseCompletedLessons + completed.size - completedLessonIds.length) / courseTotalLessons) * 100)
+    : 0
+  const moduleIdx = allModules.findIndex(m => m.id === module.id)
 
   return (
     <>
@@ -607,6 +728,19 @@ export default function LessonPlayer({
             module={module} lessons={lessons} introData={introData}
             allModules={allModules} onStart={dismissIntro}
           />
+        )}
+      </AnimatePresence>
+
+      {/* Module Recap Screen */}
+      <AnimatePresence>
+        {showRecap && (
+          <motion.div key="recap" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <ModuleRecapScreen
+              module={module}
+              recap={moduleRecap}
+              onStartQuiz={() => { setShowRecap(false); router.push(`/quiz/${module.id}`) }}
+            />
+          </motion.div>
         )}
       </AnimatePresence>
 
@@ -663,6 +797,23 @@ export default function LessonPlayer({
               {module.title}
             </span>
           </div>
+
+          {/* Course progress pill */}
+          {courseTotalLessons > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '0.45rem',
+              background: 'var(--surface)', border: '1.5px solid var(--line)',
+              borderRadius: 99, padding: '0.2rem 0.75rem', flexShrink: 0,
+            }}>
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
+                Module {moduleIdx + 1}/{allModules.length}
+              </span>
+              <span style={{ color: 'var(--line)', fontSize: '0.6rem' }}>·</span>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--green)' }}>
+                {courseProgressPct}%
+              </span>
+            </div>
+          )}
 
           {/* Lesson counter pill */}
           <div style={{
@@ -852,11 +1003,11 @@ export default function LessonPlayer({
 
             {allDone ? (
               <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                onClick={() => router.push(`/quiz/${module.id}`)}
+                onClick={() => setShowRecap(true)}
                 className="btn-primary"
                 style={{ padding: '0.55rem 1.25rem', fontSize: '0.88rem', borderRadius: 10, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
               >
-                🧠 Take Quiz →
+                🎉 See Recap →
               </motion.button>
             ) : isCurrentDone ? (
               <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}

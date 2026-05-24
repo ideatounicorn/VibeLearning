@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { EnrolledCoursesBlock, type EnrolledCourse } from '@/components/dashboard/EnrolledCoursesBlock'
 import { GettingStarted } from '@/components/dashboard/GettingStarted'
 import { StreakTracker } from '@/components/dashboard/StreakTracker'
-import { PathRoadmapWidget } from '@/components/dashboard/PathRoadmapWidget'
 import Link from 'next/link'
 
 export const metadata = {
@@ -224,12 +223,6 @@ export default async function DashboardPage() {
 
           {/* Right sidebar */}
           <div>
-            <PathRoadmapWidget
-              careerGoal={profile.career_goal ?? null}
-              pathSlug={profile.selected_path?.slug ?? null}
-              completedModuleCount={completedModules?.length ?? 0}
-              hasStartedLesson={hasStartedLesson}
-            />
 
             <GettingStarted
               hasStartedLesson={hasStartedLesson}

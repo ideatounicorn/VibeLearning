@@ -12,25 +12,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticEntries: MetadataRoute.Sitemap = [
     { url: `${SITE_URL}/`, lastModified: now, changeFrequency: 'weekly', priority: 1.0 },
     { url: `${SITE_URL}/courses`, lastModified: now, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${SITE_URL}/paths`, lastModified: now, changeFrequency: 'weekly', priority: 0.9 },
-    { url: `${SITE_URL}/assessments`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${SITE_URL}/assessments`, lastModified: now, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/teams`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${SITE_URL}/upgrade`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/privacy`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
     { url: `${SITE_URL}/terms`, lastModified: now, changeFrequency: 'yearly', priority: 0.2 },
   ]
-
-  const { data: paths } = await db
-    .from('paths')
-    .select('slug, created_at')
-    .eq('is_published', true)
-
-  const pathEntries: MetadataRoute.Sitemap = (paths ?? []).map(p => ({
-    url: `${SITE_URL}/paths/${p.slug}`,
-    lastModified: p.created_at ? new Date(p.created_at) : now,
-    changeFrequency: 'weekly',
-    priority: 0.8,
-  }))
 
   const { data: courses } = await db
     .from('courses')
@@ -44,5 +31,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.85,
   }))
 
-  return [...staticEntries, ...pathEntries, ...courseEntries]
+  const { data: subSkills } = await db
+    .from('sub_skills')
+    .select('slug, updated_at, categories!inner(slug)')
+
+  const assessmentEntries: MetadataRoute.Sitemap = (subSkills ?? []).map((s: any) => ({
+    url: `${SITE_URL}/assessments/${s.categories?.slug}/${s.slug}`,
+    lastModified: s.updated_at ? new Date(s.updated_at) : now,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+
+  return [...staticEntries, ...courseEntries, ...assessmentEntries]
 }

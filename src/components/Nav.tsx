@@ -81,7 +81,7 @@ export function Nav() {
 
         {/* Nav Links */}
         <Link
-          href="/paths"
+          href="/courses"
           style={{
             color: 'var(--muted)',
             textDecoration: 'none',
@@ -92,7 +92,21 @@ export function Nav() {
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--cream)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
         >
-          Paths
+          Courses
+        </Link>
+        <Link
+          href="/assessments"
+          style={{
+            color: 'var(--muted)',
+            textDecoration: 'none',
+            fontSize: '0.9rem',
+            fontWeight: 500,
+            transition: 'color 0.15s',
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--cream)')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--muted)')}
+        >
+          Assessments
         </Link>
 
         {/* XP + Streak pills (only when logged in) */}

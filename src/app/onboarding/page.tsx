@@ -200,7 +200,7 @@ function StorySlide({ slide, role }: { slide: CarouselSlide; role: RoleData }) {
           {slide.title}
         </h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          {slide.hierarchy!.map((level, i, arr) => {
+          {slide.hierarchy!.map((level: any, i: number, arr: any[]) => {
             const isTop = i === arr.length - 1
             return (
               <motion.div
@@ -252,7 +252,7 @@ function StorySlide({ slide, role }: { slide: CarouselSlide; role: RoleData }) {
           Tools you&apos;ll use every day — and master completely.
         </p>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-          {slide.tools!.map((tool, i) => (
+          {slide.tools!.map((tool: any, i: number) => (
             <motion.span
               key={i}
               initial={{ opacity: 0, scale: 0.85 }}
@@ -917,7 +917,7 @@ export default function OnboardingPage() {
               maxWidth: 900,
               width: '100%',
             }}>
-              {ROLES.map(role => (
+              {ROLES.map((role: any) => (
                 <button
                   key={role.id}
                   onClick={() => handleRoleSelect(role)}
@@ -1106,7 +1106,7 @@ export default function OnboardingPage() {
               </button>
 
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                {selectedRole.carousel.map((_, i) => (
+                {selectedRole.carousel.map((_: any, i: number) => (
                   <button
                     key={i}
                     onClick={() => { setSlideDir(i > slideIndex ? 1 : -1); setSlideIndex(i) }}

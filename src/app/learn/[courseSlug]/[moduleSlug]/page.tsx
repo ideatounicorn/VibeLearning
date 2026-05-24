@@ -93,6 +93,19 @@ export default async function LearnPage({ params }: Props) {
 
   const passedModuleIds = (completedCourseModules ?? []).map((p: any) => p.module_id)
 
+  // Module recap (for recap screen after all lessons done)
+  const { data: recapRow } = await db
+    .from('module_recaps')
+    .select('key_takeaways, exercises_jsonb')
+    .eq('module_id', normalizedModule.id)
+    .maybeSingle()
+
+  const moduleRecap = recapRow ?? null
+
+  // Course-wide progress counts
+  const courseTotalLessons = allModules.reduce((sum, m) => sum + m.lessonCount, 0)
+  const courseCompletedLessons = completedLessonIds.length
+
   return (
     <Suspense fallback={null}>
       <LessonPlayer
@@ -104,6 +117,9 @@ export default async function LearnPage({ params }: Props) {
         courseSlug={courseSlug}
         allModules={allModules}
         passedModuleIds={passedModuleIds}
+        moduleRecap={moduleRecap}
+        courseCompletedLessons={courseCompletedLessons}
+        courseTotalLessons={courseTotalLessons}
       />
     </Suspense>
   )
