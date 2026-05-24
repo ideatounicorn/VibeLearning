@@ -155,11 +155,8 @@ export default function AssessmentTest({ subSkillId, subSkillName, questions, us
         session_id: sessionId
       })
     }
-
-    // Auto advance after 1.5s
-    setTimeout(() => {
-      handleNext()
-    }, 1500)
+    
+    // Auto advance removed: User must click Continue in the bottom banner
   }
 
   useEffect(() => {
@@ -184,32 +181,37 @@ export default function AssessmentTest({ subSkillId, subSkillName, questions, us
   if (isFinished) {
     const pct = Math.round((score / questions.length) * 100)
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50 text-black">
-        <div className="bg-white p-10 rounded-3xl shadow-xl max-w-md w-full text-center border border-gray-100">
-          <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+      <div className="flex h-[100dvh] items-center justify-center bg-white text-black p-4">
+        <div className="bg-gray-50 p-10 md:p-14 rounded-[2.5rem] max-w-lg w-full text-center border border-gray-100 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-gray-100 to-transparent"></div>
+          
+          <div className="relative w-24 h-24 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-8 shadow-md border border-gray-100 z-10">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
           </div>
-          <h2 className="text-3xl font-extrabold mb-2">Assessment Complete!</h2>
-          <p className="text-gray-500 mb-8">{subSkillName}</p>
           
-          <div className="flex justify-between items-center bg-gray-50 rounded-2xl p-6 mb-8 border border-gray-100">
-            <div className="text-left">
-              <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Final Score</p>
-              <p className="text-4xl font-black text-black">{pct}%</p>
+          <h2 className="relative z-10 text-3xl md:text-4xl font-black mb-3">Assessment Complete!</h2>
+          <p className="relative z-10 text-gray-500 font-medium mb-10 text-lg">{subSkillName}</p>
+          
+          <div className="relative z-10 flex justify-center items-center gap-8 bg-white rounded-3xl p-8 mb-10 border border-gray-100 shadow-sm">
+            <div className="text-center">
+              <p className="text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">Final Score</p>
+              <p className="text-5xl font-black text-black">{pct}%</p>
             </div>
-            <div className="text-right">
-              <p className="text-xs text-gray-500 uppercase font-bold tracking-wider mb-1">Correct</p>
-              <p className="text-2xl font-bold text-gray-800">{score} / {questions.length}</p>
+            <div className="w-px h-16 bg-gray-100"></div>
+            <div className="text-center">
+              <p className="text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">Correct</p>
+              <p className="text-3xl font-bold text-gray-800 mt-2">{score} <span className="text-xl text-gray-400">/ {questions.length}</span></p>
             </div>
           </div>
           
           <button 
             onClick={() => router.push('/assessments')}
-            className="w-full py-4 bg-black text-white rounded-xl font-bold text-lg hover:bg-gray-800 transition-colors shadow-lg"
+            className="relative z-10 w-full py-5 bg-black text-white rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all shadow-xl hover:shadow-2xl active:scale-95"
           >
-            Return to Assessments
+            Return to Hub
           </button>
         </div>
       </div>
@@ -223,39 +225,41 @@ export default function AssessmentTest({ subSkillId, subSkillName, questions, us
     const isActuallyCorrect = correctAnswersData[currentQuestion.question_id] === label
     
     if (feedbackState !== 'idle') {
-      if (isActuallyCorrect) return 'border-green-500 bg-green-50 text-green-800 scale-[1.02] shadow-sm ring-2 ring-green-500 ring-opacity-50'
-      if (isSelected && !isActuallyCorrect) return 'border-red-500 bg-red-50 text-red-800 opacity-80'
-      return 'border-gray-200 bg-white opacity-50'
+      if (isActuallyCorrect) return 'border-green-500 bg-green-50/50 text-green-900 ring-2 ring-green-500 shadow-md z-10'
+      if (isSelected && !isActuallyCorrect) return 'border-red-300 bg-red-50 text-red-900 opacity-60'
+      return 'border-gray-200 bg-white opacity-40'
     }
     
-    return 'border-gray-200 bg-white hover:border-black hover:shadow-sm hover:bg-gray-50 text-black cursor-pointer'
+    return 'border-gray-200 bg-white hover:border-black hover:shadow-md text-black'
   }
 
   return (
-    <div className={`flex flex-col h-screen bg-gray-50 text-black font-sans transition-transform duration-100 ${feedbackState === 'incorrect' ? '-translate-x-2' : ''}`}>
+    <div className="flex flex-col h-[100dvh] bg-white text-black font-sans overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between p-6 bg-white border-b border-gray-100 shrink-0 shadow-sm z-10 relative">
+      <header className="flex items-center justify-between px-6 py-4 bg-white relative shrink-0 z-20">
         <button 
           onClick={() => router.push('/assessments')}
           className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-500 hover:text-black"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
         
-        <div className="font-bold text-gray-400 tracking-wider text-sm uppercase">
-          {subSkillName} • {currentIndex + 1} / {questions.length}
+        <div className="font-bold text-gray-400 tracking-widest text-xs uppercase flex items-center gap-2">
+          <span className="hidden sm:inline">{subSkillName}</span>
+          <span className="hidden sm:inline w-1 h-1 rounded-full bg-gray-300" />
+          <span>{currentIndex + 1} / {questions.length}</span>
         </div>
         
-        <div className={`font-black text-2xl w-12 text-right transition-colors ${timeLeft <= 5 ? 'text-red-500' : 'text-black'}`}>
+        <div className={`font-black text-xl w-12 text-right tabular-nums transition-colors ${timeLeft <= 5 ? 'text-red-500' : 'text-black'}`}>
           0:{timeLeft.toString().padStart(2, '0')}
         </div>
       </header>
       
-      {/* Progress Bar */}
-      <div className="h-1.5 w-full bg-gray-200 shrink-0">
+      {/* Progress Bar inside Header bottom */}
+      <div className="h-1 w-full bg-gray-100 shrink-0 z-20">
         <div 
           className="h-full bg-black transition-all duration-300 ease-out" 
           style={{ width: `${(currentIndex / questions.length) * 100}%` }}
@@ -263,55 +267,75 @@ export default function AssessmentTest({ subSkillId, subSkillName, questions, us
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto px-4 py-8 md:py-16">
-        <div className="max-w-3xl mx-auto w-full">
+      <main className="flex-1 overflow-y-auto px-4 py-8 md:py-12 relative z-10">
+        <div className="max-w-6xl mx-auto h-full flex flex-col lg:flex-row items-stretch justify-center gap-8 lg:gap-16 pb-32">
           
-          <div className="mb-4 inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-bold uppercase tracking-widest">
-            {currentQuestion.difficulty}
+          {/* Left Column: Context */}
+          <div className="w-full lg:w-1/2 flex flex-col justify-center">
+            <div className="mb-5 inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-[0.65rem] font-bold uppercase tracking-widest w-fit">
+              {currentQuestion.difficulty}
+            </div>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold mb-6 leading-tight text-gray-900">
+              {currentQuestion.title}
+            </h1>
+            <div className="text-base md:text-lg text-gray-700 leading-relaxed font-medium bg-gray-50/80 p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm">
+              {currentQuestion.scenario}
+            </div>
           </div>
-          
-          <h1 className="text-2xl md:text-4xl font-extrabold mb-6 leading-tight text-gray-900">
-            {currentQuestion.title}
-          </h1>
-          
-          <p className="text-lg md:text-xl text-gray-600 mb-10 leading-relaxed font-medium bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-            {currentQuestion.scenario}
-          </p>
 
-          <div className="grid gap-3">
+          {/* Right Column: Options */}
+          <div className="w-full lg:w-1/2 flex flex-col justify-center gap-3 md:gap-4">
             {[
               { label: 'A', text: currentQuestion.option_a },
               { label: 'B', text: currentQuestion.option_b },
               { label: 'C', text: currentQuestion.option_c },
               { label: 'D', text: currentQuestion.option_d },
             ].map(opt => (
-              <div 
+              <button 
                 key={opt.label}
                 onClick={() => handleSelect(opt.label)}
-                className={`p-5 rounded-2xl border-2 transition-all duration-200 flex gap-4 items-center ${getOptionStyle(opt.label)}`}
+                disabled={feedbackState !== 'idle'}
+                className={`p-4 md:p-5 rounded-2xl border-2 text-left flex justify-between items-center transition-all duration-200 group ${getOptionStyle(opt.label)}`}
               >
-                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center font-bold shrink-0 text-gray-500">
+                <span className="font-semibold text-base md:text-lg pr-4 leading-snug">{opt.text}</span>
+                <span className="w-8 h-8 rounded-lg border border-current opacity-30 flex items-center justify-center font-bold text-xs shrink-0 group-hover:opacity-100 transition-opacity">
                   {opt.label}
-                </div>
-                <div className="font-semibold text-lg">{opt.text}</div>
-              </div>
+                </span>
+              </button>
             ))}
           </div>
 
         </div>
       </main>
-      
-      {/* Screen Shake Animation logic via CSS */}
-      <style dangerouslySetInnerHTML={{__html: `
-        .bg-gray-50 { background-color: #f9fafb; }
-        .-translate-x-2 { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake {
-          10%, 90% { transform: translate3d(-1px, 0, 0); }
-          20%, 80% { transform: translate3d(2px, 0, 0); }
-          30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-          40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-      `}} />
+
+      {/* Feedback Banner Footer */}
+      <div 
+        className={`fixed bottom-0 left-0 w-full z-30 transition-transform duration-300 ease-in-out ${feedbackState !== 'idle' ? 'translate-y-0' : 'translate-y-full'}`}
+      >
+        <div className={`w-full py-6 px-6 md:px-12 flex flex-col sm:flex-row items-center justify-between gap-6 border-t-2 ${feedbackState === 'correct' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+          <div className="flex items-center gap-4">
+            {feedbackState === 'correct' ? (
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg shadow-green-500/30">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </div>
+            ) : (
+              <div className="w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white shrink-0 shadow-lg shadow-red-500/30">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </div>
+            )}
+            <h3 className={`text-2xl font-black ${feedbackState === 'correct' ? 'text-green-700' : 'text-red-700'}`}>
+              {feedbackState === 'correct' ? 'Correct!' : 'Incorrect'}
+            </h3>
+          </div>
+          
+          <button 
+            onClick={handleNext}
+            className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black text-lg text-white transition-all active:scale-95 shadow-xl hover:shadow-2xl ${feedbackState === 'correct' ? 'bg-green-600 hover:bg-green-700 shadow-green-600/20' : 'bg-red-600 hover:bg-red-700 shadow-red-600/20'}`}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
