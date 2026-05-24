@@ -65,7 +65,7 @@ export default function AssessmentTest({ subSkillId, subSkillName, questions, us
   const db = supabase()
   
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(30)
+  const [timeLeft, setTimeLeft] = useState(60)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [feedbackState, setFeedbackState] = useState<'idle' | 'correct' | 'incorrect'>('idle')
   const [isFinished, setIsFinished] = useState(false)
@@ -83,7 +83,7 @@ export default function AssessmentTest({ subSkillId, subSkillName, questions, us
   const handleNext = useCallback(() => {
     setSelectedOption(null)
     setFeedbackState('idle')
-    setTimeLeft(30)
+    setTimeLeft(60)
     
     if (currentIndex < questions.length - 1) {
       setCurrentIndex(prev => prev + 1)
@@ -149,9 +149,9 @@ export default function AssessmentTest({ subSkillId, subSkillName, questions, us
         user_id: userId,
         question_id: currentQuestion.question_id,
         sub_skill_id: subSkillId,
-        selected_option: ansOption as any,
+        selected_option: ansOption.charAt(0) as any, // prevent varchar length error
         is_correct: isCorrect,
-        time_taken_secs: 30 - timeLeft,
+        time_taken_secs: 60 - timeLeft,
         session_id: sessionId
       })
     }
@@ -303,6 +303,15 @@ export default function AssessmentTest({ subSkillId, subSkillName, questions, us
                 </span>
               </button>
             ))}
+            
+            {/* Skip Button */}
+            <button
+              onClick={() => handleSelect('S')}
+              disabled={feedbackState !== 'idle'}
+              className={`mt-2 py-3 px-4 w-full md:w-auto self-center text-gray-400 font-bold text-sm tracking-wide uppercase hover:text-gray-700 transition-colors ${feedbackState !== 'idle' ? 'opacity-0 pointer-events-none' : ''}`}
+            >
+              Skip Question
+            </button>
           </div>
 
         </div>
