@@ -35,3 +35,4 @@ Variants — append to template:
 - `thinking.png`: "paw resting on chin, eyes glancing up and to the side, slight squint, mouth flat"
 - `celebrating.png`: "both arms raised in victory, eyes wide and bright, open-mouth grin, leaping slightly"
 - `oops.png`: "one paw scratching back of head, sheepish closed-mouth smile, eyes slightly closed"
+xq
