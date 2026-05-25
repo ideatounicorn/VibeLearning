@@ -1,0 +1,79 @@
+{
+  "courseTitle": "Antigravity - Google's Coding Agent",
+  "courseSlug": "antigravity-google-coding-agent",
+  "persona": "software engineer looking to adopt AI coding agents to improve productivity",
+  "estimatedHours": 2,
+  "modules": [
+    {
+      "title": "Introduction to Google Antigravity",
+      "description": "Understand what Antigravity is, how it compares to other AI coding tools, and set it up.",
+      "order_index": 0,
+      "lessons": [
+        {
+          "title": "What is Antigravity? Google's Coding Agent Explained",
+          "youtube_url": "https://www.youtube.com/watch?v=9OQ5vaYbGV0",
+          "youtube_video_id": "9OQ5vaYbGV0",
+          "channel_name": "Fireship",
+          "channel_url": "https://youtube.com/@Fireship",
+          "estimated_duration_minutes": 10,
+          "why_curated": "Fireship provides the best high-level overview of the Antigravity agent announced at I/O 2026.",
+          "concept_focus": "High level overview of Antigravity capabilities",
+          "pedagogical_role": "foundation",
+          "additive_value": "Provides the essential framing for what the agent can and cannot do.",
+          "order_index": 0
+        },
+        {
+          "title": "Antigravity vs Claude Code vs Codex",
+          "youtube_url": "https://www.youtube.com/watch?v=-dwLbaCB-_I",
+          "youtube_video_id": "-dwLbaCB-_I",
+          "channel_name": "Vaibhav Sisinty",
+          "channel_url": "https://youtube.com/@VaibhavSisinty",
+          "estimated_duration_minutes": 15,
+          "why_curated": "It offers a direct comparison between Antigravity and its competitors to help you decide when to use which tool.",
+          "concept_focus": "Comparative analysis of AI coding agents",
+          "pedagogical_role": "deep-dive",
+          "additive_value": "While Fireship gives the overview, this video gives practical use-case comparisons.",
+          "order_index": 1
+        }
+      ]
+    },
+    {
+      "title": "Building Real Projects with Antigravity",
+      "description": "Learn how to use Antigravity for real-world software engineering tasks.",
+      "order_index": 1,
+      "lessons": [
+        {
+          "title": "How Google Just Killed Half the AI Industry",
+          "youtube_url": "https://www.youtube.com/watch?v=T88PAPGrDhE",
+          "youtube_video_id": "T88PAPGrDhE",
+          "channel_name": "Singh in USA",
+          "channel_url": "https://youtube.com/@SinghinUSA",
+          "estimated_duration_minutes": 12,
+          "why_curated": "Showcases practical, hands-on examples of Antigravity disrupting traditional coding workflows.",
+          "concept_focus": "Hands-on workflow with Antigravity",
+          "pedagogical_role": "hands-on-build",
+          "additive_value": "Transitions from theory to actual usage in an IDE environment.",
+          "order_index": 0
+        }
+      ]
+    }
+  ],
+  "contributors": [
+    {
+      "channel_name": "Fireship",
+      "channel_url": "https://youtube.com/@Fireship",
+      "video_count": 1
+    },
+    {
+      "channel_name": "Vaibhav Sisinty",
+      "channel_url": "https://youtube.com/@VaibhavSisinty",
+      "video_count": 1
+    },
+    {
+      "channel_name": "Singh in USA",
+      "channel_url": "https://youtube.com/@SinghinUSA",
+      "video_count": 1
+    }
+  ],
+  "scoutNotes": "There are limited videos specifically focused on deep dives into Antigravity so far, so these 3 videos were curated to provide the foundational understanding and practical comparisons."
+}
